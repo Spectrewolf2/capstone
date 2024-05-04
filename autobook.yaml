@@ -1,0 +1,67 @@
+---
+- name: Install Docker and Docker Compose on VM
+  hosts: aws_hosts
+  become: yes
+  vars:
+    docker_user: ubuntu
+    docker_compose_version: "1.29.2"  # Replace with the desired version of Docker Compose
+    ssh_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCp8bljZiij0IGMxXK5LV5CHRA1D+ahEOKL/RyWcgyFxGZ95zQsoyE/hWzGbyOXopTt4+RiMKjos8g1yIAKJhNvfbunf4r6/j58J0mWZS/3X0zl4/skoWjAPg/z5aRjunuOBmqKVJsUIkc2jWupAmtZ2FsFL8RnWMFPl3RTmJgfLjxOTDZjTnRpp/J6lhY/jePVH6NwM35bri8G9KwbKZ3FLzOqn++c/NYYD5cRafLzWwzfHJD95fLTFIfRDn1ncdaxhuWfJhWl6DHV0Wt/VA43ouXKPYAdoUP3owqMqQpQ8uWAfgZHXtI05Q/zqVOu/Xlg36Uqw01T6mFtakBRURphJyh0wkZNOt7b0oBNhsREg1gvcNFdOJ33fnYX3ks62xOHb7TBCOxkIz0ysTGuGX12CDc6A5xkqd06+IK8lwcCgvjDRgu+CT/REHfER6sJArgSU96BMSTX+phoqpmvvIX0oSBdXfanI2m5hFHVFOlWRjEvLF/UasdLzRoHOBV5yV0= administrator@administrator-Latitude-7430"
+  
+  tasks:
+    - name: Update package cache and upgrade existing packages
+      become: yes
+      apt:
+        upgrade: yes
+        update_cache: yes
+        
+    - name: Check if Docker is installed
+      ansible.builtin.stat:
+        path: /usr/bin/docker
+      register: docker_installed
+
+    - name: Check if Docker Compose is installed
+      ansible.builtin.stat:
+        path: /usr/local/bin/docker-compose
+      register: docker_compose_installed
+
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+      when: docker_installed.stat.exists == False
+
+    - name: Install Docker Compose
+      get_url:
+        url: "https://github.com/docker/compose/releases/download/{{ docker_compose_version }}/docker-compose-Linux-x86_64"
+        dest: /usr/local/bin/docker-compose
+        mode: 'a+x'
+      when: docker_compose_installed.stat.exists == False
+
+    - name: Add current user to Docker group (to run Docker commands without sudo)
+      user:
+        name: "{{ docker_user }}"
+        groups: docker
+        append: yes
+      when: docker_installed.stat.exists == True
+
+    - name: Create directories if they do not exist
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: '0755'
+      become: yes
+      loop:
+        - /home/{{ docker_user }}/docker
+        - /home/{{ docker_user }}/config
+        - /home/{{ docker_user }}/gallery
+        - /home/{{ docker_user }}/gallery/mariadb_config
+        - /home/{{ docker_user }}/gallery/nginx_config
+        - /home/administrator
+
+    - name: Create NGINX, MariaDB, and Piwigo Docker Compose file
+      template:
+        src: docker-compose.yml.j2
+        dest: "/home/{{ docker_user }}/docker-compose.yml"
+
+    - name: Run Docker Compose to start NGINX, MariaDB
+      command: sudo docker-compose up -d
