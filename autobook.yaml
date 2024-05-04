@@ -5,7 +5,7 @@
   vars:
     docker_user: ubuntu
     docker_compose_version: "1.29.2"  # Replace with the desired version of Docker Compose
-    ssh_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCp8bljZiij0IGMxXK5LV5CHRA1D+ahEOKL/RyWcgyFxGZ95zQsoyE/hWzGbyOXopTt4+RiMKjos8g1yIAKJhNvfbunf4r6/j58J0mWZS/3X0zl4/skoWjAPg/z5aRjunuOBmqKVJsUIkc2jWupAmtZ2FsFL8RnWMFPl3RTmJgfLjxOTDZjTnRpp/J6lhY/jePVH6NwM35bri8G9KwbKZ3FLzOqn++c/NYYD5cRafLzWwzfHJD95fLTFIfRDn1ncdaxhuWfJhWl6DHV0Wt/VA43ouXKPYAdoUP3owqMqQpQ8uWAfgZHXtI05Q/zqVOu/Xlg36Uqw01T6mFtakBRURphJyh0wkZNOt7b0oBNhsREg1gvcNFdOJ33fnYX3ks62xOHb7TBCOxkIz0ysTGuGX12CDc6A5xkqd06+IK8lwcCgvjDRgu+CT/REHfER6sJArgSU96BMSTX+phoqpmvvIX0oSBdXfanI2m5hFHVFOlWRjEvLF/UasdLzRoHOBV5yV0= administrator@administrator-Latitude-7430"
+    ssh_key: ""
   
   tasks:
     - name: Update package cache and upgrade existing packages
